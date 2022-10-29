@@ -1,0 +1,115 @@
+---
+title: "project"
+author: "Tim"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE, warning = FALSE)
+```
+
+```{r}
+#load necessary libraries
+library(tidyverse)
+library(tidymodels)
+tidymodels_prefer()
+#Visual
+library(ggplot2)
+library(corrplot)
+```
+
+```{r,message=FALSE,warning=FALSE}
+#pre-process
+continent <- read_csv("continent.csv") %>% 
+  select(2,1)
+
+lifetime<- read_csv("lifetime.csv") %>% 
+  rename(Country = 'Country or Area',Year="Year(s)", 
+         Lifetime="Value") %>% 
+  select(1,2,4) %>% 
+  filter(Year <= 2022)
+
+gdp <- read_csv("gdp.csv") %>%
+  filter(!grepl("GDP|capital formation",Item)) %>% 
+  rename(Country = 'Country or Area') %>% 
+  group_by(Country,Year,Item) %>% 
+  summarize("Value"= mean(Value)) %>% 
+  spread("Item","Value") 
+  
+population <- read_csv("population.csv",skip=3) %>% 
+  rename(Country = 'Country Name') %>% 
+  gather("Year","Population",-(1:4)) %>% 
+  mutate_at("Year", as.numeric) %>% 
+  select(-2,-3,-4)
+
+edu <- read_csv("education.csv") %>% select(-2) %>% rename(Country="Entity") %>% 
+  rename("Education"=
+           `Average Total Years of Schooling for Adult Population (Lee-Lee (2016), Barro-Lee (2018) and UNDP (2018))`)
+dem <- read_csv("democracy.csv") %>% select(-2) %>% rename(Country="Entity") %>% 
+  rename(dem1="electdem_vdem_owid",dem2="libdem_vdem_owid",dem3="participdem_vdem_owid",
+         dem4="delibdem_vdem_owid",dem5="egaldem_vdem_owid") %>% 
+  group_by(Country,Year) %>% 
+  summarize(Democracy=mean(c(dem1,dem2,dem3,dem4,dem5),na.rm=T))
+
+death <- read_csv("death.csv") %>% select(-2) %>% 
+  rename(Country="Entity") %>% 
+  select_if(~sum(is.na(.))<=500)
+
+df<- gdp %>% 
+  left_join(population,by = c("Country","Year")) %>% 
+  left_join(continent, by="Country") %>% 
+  left_join(lifetime, by=c("Country","Year")) %>% 
+  left_join(dem, by=c("Country","Year")) %>% 
+  left_join(edu,by=c("Country","Year")) %>% 
+  left_join(death,by=c("Country","Year")) %>% 
+  ungroup() %>% 
+  rename(Inventory= "Changes in inventories", 
+         Exports="Exports of goods and services",
+         Consumption="Final consumption expenditure", 
+         Government="General government final consumption expenditure",
+         Household="Household consumption expenditure (including Non-profit institutions serving households)",
+         Imports="Imports of goods and services") %>%
+  mutate_at(c("Inventory","Exports","Consumption","Household","Government","Imports"), as.numeric) %>%
+  mutate_at(c("Country","Continent"), as.factor) %>% 
+  relocate(!is.numeric,"Year") %>% 
+  na.omit() %>% 
+  select(-"Lifetime","Lifetime")
+
+
+
+
+df %>% 
+  select_if(is.numeric) %>% 
+  cor() %>% 
+  corrplot(tl.cex=0.01)
+cnames <- cbind(df %>% colnames())
+
+
+library(MASS)
+library(leaps)
+library(caret)
+df<- df %>% select(-1,-2)
+
+set.seed(123)
+
+train.control <- trainControl(method = "cv", number = 10)
+
+step.model <- train(Lifetime ~., data = df,
+                    method = "leapBackward", 
+                    tuneGrid = data.frame(nvmax = 1:10),
+                    trControl = train.control
+                    )
+step.model$results
+
+```
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
