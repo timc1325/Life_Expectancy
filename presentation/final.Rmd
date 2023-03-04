@@ -1,0 +1,353 @@
+---
+title: "Final Project: Predicting Lifetime Expectancy"
+author: "Group 4"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE, warning = FALSE)
+```
+
+#Data Loading
+```{r}
+#load necessary libraries
+library(tidyverse) #readr, dplyr
+
+#Visual
+library(ggplot2)
+library(corrplot)
+
+
+#Analysis
+library(leaps) #regsubsets
+library(car) #boxcox
+library(caret) #confusion matrix
+
+#load processed dataset
+df <- read_csv("df.csv")
+
+
+#change outcome to categorical
+df <- df %>% 
+  mutate(Life_Expectancy = case_when(
+  Lifetime < 72  ~ 'Below Average',
+  Lifetime < 100  ~ 'Above Average')) %>% 
+  mutate_at("Life_Expectancy", as.factor)
+
+#delete innecessary variables
+df <- df %>% 
+  select(-contains("Death")) %>% #not analyzing any of the cause of death factor this time 
+  rename("Depression"="Prevalence - Depressive disorders - Sex: Both - Age: Age-standardized (Percent)") %>%
+  select(-contains("Prevalence")) %>% #excluding all mental illness term except for depression
+  rename("Diet_Animal"="Calories from animal protein (FAO (2017))") %>% 
+  rename("Diet_Plant"="Calories from plant protein (FAO (2017))") %>% 
+  select(-contains("Calories")) %>% 
+  select(-Population,-Continent)
+
+#Change "Above Average" to the target level, since we are interested in longevity
+df$Life_Expectancy <- factor(df$Life_Expectancy, levels = c("Below Average","Above Average"))
+contrasts(df$Life_Expectancy)
+```
+
+
+#Feature Selection
+```{r,message=FALSE,warning=FALSE}
+
+
+#get the names of crucial features of Sequential, Forward and Backward Selection
+
+#exclude two categorical variable, and year variable, which is predetermined to be included in the data. 
+seqrep <- 
+  regsubsets(Life_Expectancy~Inventory+Exports+Consumption+Government+Household+Imports, data = df %>% select(-1,-2), 
+                     nvmax = 3, method = "seqrep") %>% 
+  summary()
+seqrep
+
+#forward selection
+forward <- 
+  regsubsets(Life_Expectancy~Inventory+Exports+Consumption+Government+Household+Imports, data = df %>% select(-1,-2), 
+                      nvmax = 3, method = "forward") %>% 
+  summary()
+forward
+
+
+#backward selection
+backward <- 
+  regsubsets(Life_Expectancy~Inventory+Exports+Consumption+Government+Household+Imports, data = df %>% select(-1,-2), 
+                      nvmax = 3, method = "backward") %>% 
+  summary()
+
+backward
+```
+
+#Confusion Matrix
+```{r}
+df %>% select(Consumption, Education, Diet_Animal, Diet_Plant, Depression, Smoking, Obesity) %>% 
+  cor() %>% 
+  corrplot()
+chisq.test(df$Education,df$Consumption) #testing some high correlation predictors, turns out good! no wrorries
+```
+ 
+follow the result above, we delete gdp terms except consumption, also delete diet_animal due to confusion matrix
+```{r}
+df <- df %>%  
+  select(-c(Inventory,Exports,Government,Household,Imports,Diet_Animal))
+```
+
+#EDA symbox
+```{r}
+df %>% ggplot(aes(Consumption))+geom_histogram()
+symbox(~Consumption, data=df)
+df %>% ggplot(aes(log(Consumption)))+geom_histogram()
+#log Consumption
+
+df %>% ggplot(aes(Education))+geom_histogram()
+symbox(~Education, data=df)
+#keep education the same
+
+df %>% ggplot(aes(Diet_Plant))+geom_histogram()
+symbox(~Diet_Plant, data=df)
+df %>% ggplot(aes(log(Diet_Plant)))+geom_histogram()
+#data is large 1700+ so we are good
+
+df %>% ggplot(aes(Depression))+geom_histogram()
+symbox(~Depression, data=df)
+df %>% ggplot(aes(log(Depression)))+geom_histogram()
+#data is large 1700+ so we are good
+
+df %>% ggplot(aes(Sanitation))+geom_histogram()
+symbox(~Sanitation, data=df)
+```
+
+
+
+```{r}
+#view response variable
+tab <- data.frame(table(df$Life_Expectancy))
+a <- ggplot(tab,aes(x=Var1,y=Freq)) +
+  geom_bar(stat="identity", fill="steelblue",width=0.4) +
+  theme_bw() + xlab("\nLife Expectancy") + ylab("Frequency\n") +
+  ggtitle("Barplot of Life Expectancy Frequency") +
+  theme(plot.title = element_text(hjust = 0.5,size=14),
+        axis.title.x = element_text(size = 12.5),
+        axis.title.y = element_text(size = 12.5)) +
+  geom_text(aes(label = Freq), vjust = 1.5, color="white",
+             position = position_dodge(.9), size = 4)
+a
+```
+
+```{r}
+library(ggpubr)
+c <- ggplot(df,aes(x=Consumption)) +
+  geom_histogram(fill="deepskyblue",bins=20)
+d <- ggplot(df,aes(x=Diet_Plant)) +
+  geom_histogram(fill="cornsilk",bins=20)
+e <- ggplot(df,aes(x=Education)) +
+  geom_histogram(fill="darkgoldenrod1",bins=20)
+f <- ggplot(df,aes(x=Smoking)) +
+  geom_histogram(fill="coral1",bins=20)
+g <- ggplot(df,aes(x=Depression)) +
+  geom_histogram(fill="#999999",bins=20)
+h <- ggplot(df,aes(x=Sanitation)) +
+  geom_histogram(bins=20,fill="darkolivegreen2")
+ggarrange(c,d,e,f,g,h)
+```
+```{r}
+#heatmap for GDP-related
+library(reshape2)
+corr_mat <- round(cor(df[,4:9]),3)
+melted_corr_mat <- melt(corr_mat)
+ggplot(data = melted_corr_mat, aes(x=Var1, y=Var2, fill=value)) +
+  geom_tile() +
+  geom_text(aes(Var2, Var1, label = value),
+          color = "white", size = 4)
+```
+
+```{r}
+#heatmap for others
+corr_mat <- df %>% 
+  select(Consumption, Education,Diet_Plant,Depression, Smoking, Obesity) %>% 
+  cor() %>% round(3)
+melted_corr_mat <- melt(corr_mat)
+ggplot(data = melted_corr_mat, aes(x=Var1, y=Var2, fill=value)) +
+  geom_tile() +
+  geom_text(aes(Var2, Var1, label = value),
+          color = "white", size = 4)
+```
+
+```{r}
+#convert smoking and sanitation
+Smoking1 = cut(df$Smoking,breaks=(c(0,13.6,22.6,40)),labels=c("Low","Medium","High"))
+Sanitation1 = cut(df$Sanitation,breaks=(c(0,0.95,1)),labels=c("Lack Access","Safe Access"),right = TRUE)
+df <- df %>% 
+  mutate(Smoking = as.factor(Smoking1)) %>% 
+  mutate(Sanitation = as.factor(Sanitation1)) %>% 
+  #change order
+  select(-Smoking,-Sanitation,-Life_Expectancy,Smoking,Sanitation, Life_Expectancy)
+```
+
+```{r}
+library(formattable)
+formattable(table(df$Smoking,df$Life_Expectancy))
+#versus continent
+tab1 <- data.frame(table(df[,c("Smoking","Life_Expectancy")]))
+b <- ggplot(tab1,aes(x=Smoking,y=Freq,fill=Life_Expectancy)) +
+  geom_bar(stat="identity",alpha = 1.5,position = position_dodge()) +
+  theme_bw() + ylab("Frequency\n") + scale_fill_brewer(palette="Blues") +
+  ggtitle("Barplot of Life Expectancy Frequency v.s Smoking") +
+  theme(plot.title = element_text(hjust = 0.5,size=14),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12)) + xlab("\n Smoking") + 
+  geom_text(aes(label = Freq), vjust = -0.3,
+             position = position_dodge(.9), size = 3.5)
+b
+```
+
+```{r}
+#year
+#table(df$Year)
+tab2 <- data.frame(table(df[,c("Sanitation","Life_Expectancy")]))
+y <- ggplot(tab2,aes(x=Sanitation,y=Freq,fill=Life_Expectancy)) +
+  geom_bar(stat="identity",alpha = 1,position = position_dodge()) +
+  theme_bw() + ylab("Frequency\n") + 
+  scale_fill_manual(values=c("#bae4b3","#238b45")) +
+  ggtitle("Barplot of Life Expectancy Frequency v.s Sanitation") +
+  theme(plot.title = element_text(hjust = 0.5,size=14),
+        axis.title.x = element_text(size = 12.5),
+        axis.title.y = element_text(size = 12.5)) + 
+  xlab("\n Sanitation Accessibility") +
+  geom_text(aes(label = Freq), vjust = -0.3,
+             position = position_dodge(.9), size = 4)
+y
+```
+
+
+
+
+
+
+
+
+
+#Model 1
+```{r}
+mod0 <- glm(Life_Expectancy~log(Consumption)+Education+Diet_Plant+Depression+Obesity+Smoking+Sanitation,df,family="binomial")
+summary(mod0)
+
+```
+
+#VIF Model 1
+```{r}
+vif(glm(Life_Expectancy ~ log(Consumption)+ Education + Diet_Plant + Depression + Obesity, df, family="binomial"))
+```
+
+#Final Model
+```{r}
+mod <- glm(Life_Expectancy~log(Consumption)+Education+Diet_Plant+Obesity+Depression+Smoking+Sanitation+ Smoking*Sanitation,df,family="binomial")
+summary(mod)
+```
+
+#Effect Plot and Interaction Plot
+```{r}
+library(effects) 
+plot(Effect("Consumption",mod))
+plot(Effect("Education",mod))
+plot(Effect("Diet_Plant",mod))
+plot(Effect("Obesity",mod))
+plot(Effect("Depression",mod))
+# life <- ifelse(df$Life_Expectancy=="Above Average",1,0)
+# Obe <- ifelse(df$Obesity>=49.7,"High","Low")
+# Edu <- ifelse(df$Education >8,"High","Low")
+# Dep <- ifelse(df$Depression >3.9,"High","Low")
+interaction.plot( 
+    df$Smoking,#x-axis variable
+    df$Sanitation,#variable for line
+    df$Lifetime) #y-axis variable
+interaction.plot( 
+    df$Sanitation,#x-axis variable
+    df$Smoking,#variable for line
+    df$Lifetime) #y-axis variable
+```
+
+#Measure of Accuracy
+ROC Curve and AUC value
+```{r}
+library(ROCit)
+## Warning: package 'ROCit' was built under R version 3.5.2
+ROCit_obj <- rocit(mod$fitted.values,df$Life_Expectancy)
+plot(ROCit_obj)
+ROCit_obj$AUC
+```
+
+Confusion Matrix
+```{r}
+predict_life <- predict(mod,df,"response")
+predict_life <- as.factor(ifelse(predict_life > 0.5, "Above Average", "Below Average"))
+confusionMatrix(predict_life,df$Life_Expectancy,mode = "everything")
+
+```
+
+Using CV to test for overfitting
+```{r}
+set.seed(827)
+
+#Train test split; using 80% as training
+sample <- sample(c(TRUE, FALSE), nrow(df), replace=TRUE, prob=c(0.8,0.2))
+train  <- df[sample, ]
+test   <- df[!sample, ]
+
+# Cross-Validation
+set.seed(123)
+train.control <- trainControl(method = "cv", 
+                              number = 10, repeats = 3)
+# Train the model
+model <- train(Life_Expectancy~log(Consumption)+Education+Depression+Smoking+Sanitation+Smoking*Education, train, 
+               method = "glm",family="binomial",
+               trControl = train.control)
+
+model$resample
+```
+
+
+
+#Interpretation
+With confidence interval of exponentiated coefficients, we can interpret the Odds and Logit Scores
+```{r}
+c1 = exp(coef(mod))
+c2 = exp(confint(mod))
+cbind(Estimate=c1,c2)
+
+```
+
+Plot of Odds
+```{r}
+library(sjPlot)
+plot_model(mod)
+```
+
+```{r,warning=F}
+mmps(mod,~log(Consumption)+Education+Diet_Plant+Obesity+Depression+Smoking+Sanitation+ Smoking*Sanitation)
+```
+```{r}
+influencePlot(mod)
+```
+
+
+#Variance Analysis
+```{r}
+#better residual plot by binning into categories
+library(arm)
+plot(mod,1)
+binnedplot(fitted(mod), 
+           residuals(mod, type = "response"), 
+           nclass = NULL, 
+           xlab = "Expected Values", 
+           ylab = "Average residual", 
+           main = "Binned residual plot", 
+           cex.pts = 0.8, 
+           col.pts = 1, 
+           col.int = "gray")
+```
+
+

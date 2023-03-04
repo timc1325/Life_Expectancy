@@ -1,227 +1,224 @@
-Continent,Country
-Africa,Algeria
-Africa,Angola
-Africa,Benin
-Africa,Botswana
-Africa,Burkina Faso
-Africa,Burundi
-Africa,Cameroon
-Africa,Cape Verde
-Africa,Central African Republic
-Africa,Chad
-Africa,Comoros
-Africa,Congo
-Africa,Democratic Republic of the Congo
-Africa,Djibouti
-Africa,Egypt
-Africa,Equatorial Guinea
-Africa,Eritrea
-Africa,Ethiopia
-Africa,Gabon
-Africa,Gambia
-Africa,Ghana
-Africa,Guinea
-Africa,Guinea-Bissau
-Africa,Côte d'Ivoire
-Africa,Kenya
-Africa,Lesotho
-Africa,Liberia
-Africa,Libya
-Africa,Madagascar
-Africa,Malawi
-Africa,Mali
-Africa,Mauritania
-Africa,Mauritius
-Africa,Morocco
-Africa,Mozambique
-Africa,Namibia
-Africa,Niger
-Africa,Nigeria
-Africa,Rwanda
-Africa,Sao Tome and Principe
-Africa,Senegal
-Africa,Seychelles
-Africa,Sierra Leone
-Africa,Somalia
-Africa,South Africa
-Africa,South Sudan
-Africa,Sudan
-Africa,Eswatini
-Africa,United Republic of Tanzania
-Africa,Togo
-Africa,Tunisia
-Africa,Uganda
-Africa,Zambia
-Africa,Zimbabwe
-Asia,Afghanistan
-Asia,Bahrain
-Asia,Bangladesh
-Asia,Bhutan
-Asia,Brunei
-Asia,Burma (Myanmar)
-Asia,Cambodia
-Asia,China
-Asia,East Timor
-Asia,India
-Asia,Indonesia
-Asia,Iran (Islamic Republic of)
-Asia,Iraq
-Asia,Israel
-Asia,Japan
-Asia,Jordan
-Asia,Kazakhstan
-Asia,"Korea, North"
-Asia,"Korea, South"
-Asia,Kuwait
-Asia,Kyrgyzstan
-Asia,Lao People's Democratic Republic
-Asia,Lebanon
-Asia,Malaysia
-Asia,Maldives
-Asia,Mongolia
-Asia,Nepal
-Asia,Oman
-Asia,Pakistan
-Asia,Philippines
-Asia,Qatar
-Asia,Russian Federation
-Asia,Saudi Arabia
-Asia,Singapore
-Asia,Sri Lanka
-Asia,Syria
-Asia,Tajikistan
-Asia,Thailand
-Asia,Turkey
-Asia,Turkmenistan
-Asia,United Arab Emirates
-Asia,Uzbekistan
-Asia,Viet Nam
-Asia,Yemen
-Europe,Albania
-Europe,Andorra
-Europe,Armenia
-Europe,Austria
-Europe,Azerbaijan
-Europe,Belarus
-Europe,Belgium
-Europe,Bosnia and Herzegovina
-Europe,Bulgaria
-Europe,Croatia
-Europe,Cyprus
-Europe,CZ
-Europe,Denmark
-Europe,Estonia
-Europe,Finland
-Europe,France
-Europe,Georgia
-Europe,Germany
-Europe,Greece
-Europe,Hungary
-Europe,Iceland
-Europe,Ireland
-Europe,Italy
-Europe,Latvia
-Europe,Liechtenstein
-Europe,Lithuania
-Europe,Luxembourg
-Europe,Macedonia
-Europe,Malta
-Europe,Republic of Moldova
-Europe,Monaco
-Europe,Montenegro
-Europe,Netherlands
-Europe,Norway
-Europe,Poland
-Europe,Portugal
-Europe,Romania
-Europe,San Marino
-Europe,Serbia
-Europe,Slovakia
-Europe,Slovenia
-Europe,Spain
-Europe,Sweden
-Europe,Switzerland
-Europe,Ukraine
-Europe,United Kingdom
-Europe,Vatican City
-North America,Anguilla
-North America,Antigua and Barbuda
-North America,Bahamas
-North America,Barbados
-North America,Belize
-North America,Canada
-North America,Costa Rica
-North America,Cuba
-North America,Dominica
-North America,Dominican Republic
-North America,El Salvador
-North America,Grenada
-North America,Guatemala
-North America,Haiti
-North America,Honduras
-North America,Jamaica
-North America,Mexico
-North America,Nicaragua
-North America,Panama
-North America,Saint Kitts and Nevis
-North America,Saint Lucia
-North America,Saint Vincent and the Grenadines
-North America,Trinidad and Tobago
-North America,US
-Oceania,Australia
-Oceania,Fiji
-Oceania,Kiribati
-Oceania,Marshall Islands
-Oceania,Micronesia
-Oceania,Nauru
-Oceania,New Zealand
-Oceania,Palau
-Oceania,Papua New Guinea
-Oceania,Samoa
-Oceania,Solomon Islands
-Oceania,Tonga
-Oceania,Tuvalu
-Oceania,Vanuatu
-South America,Argentina
-South America,Aruba
-South America,Bolivia (Plurinational State of)
-South America,Brazil
-South America,Chile
-South America,Colombia
-South America,Ecuador
-South America,Guyana
-South America,Paraguay
-South America,Peru
-South America,Suriname
-South America,Uruguay
-South America,Venezuela (Bolivarian Republic of)
-North America,Bermuda
-North America,British Virgin Islands
-North America,Cayman Islands
-Asia,Brunei Darussalam
-Asia,China, Hong Kong SAR
-Asia,China, Macao SAR
-Africa,Cabo Verde
-Oceania,Cook Islands
-South America,Curaçao
-Europe,Czechia
-Asia,Democratic People's Republic of Korea
-Asia,Former USSR
-Oceania,French Polynesia
-North America,Greenland
-Asia,Islamic Republic of Iran 
-Europe,Kosovo
-North America,Montserrat
-Asia,Myanmar
-Oceania,New Caledonia
-Europe,North Macedonia
-North America,Puerto Rico
-Asia,Republic of Korea
-North America,Sint Maarten (Dutch part)
-Asia,State of Palestine
-Asia,Syrian Arab Republic
-Asia,Timor-Leste
-North America,Turks and Caicos Islands
-North America,United States of America
-
-
+Country,Continent
+Algeria,Africa
+Angola,Africa
+Benin,Africa
+Botswana,Africa
+Burkina Faso,Africa
+Burundi,Africa
+Cameroon,Africa
+Cape Verde,Africa
+Central African Republic,Africa
+Chad,Africa
+Comoros,Africa
+Congo,Africa
+Democratic Republic of the Congo,Africa
+Djibouti,Africa
+Egypt,Africa
+Equatorial Guinea,Africa
+Eritrea,Africa
+Ethiopia,Africa
+Gabon,Africa
+Gambia,Africa
+Ghana,Africa
+Guinea,Africa
+Guinea-Bissau,Africa
+Cote d'Ivoire,Africa
+Kenya,Africa
+Lesotho,Africa
+Liberia,Africa
+Libya,Africa
+Madagascar,Africa
+Malawi,Africa
+Mali,Africa
+Mauritania,Africa
+Mauritius,Africa
+Morocco,Africa
+Mozambique,Africa
+Namibia,Africa
+Niger,Africa
+Nigeria,Africa
+Rwanda,Africa
+Sao Tome and Principe,Africa
+Senegal,Africa
+Seychelles,Africa
+Sierra Leone,Africa
+Somalia,Africa
+Sudan,Africa
+Eswatini,Africa
+United Republic of Tanzania,Africa
+Togo,Africa
+Tunisia,Africa
+Uganda,Africa
+Zambia,Africa
+Zimbabwe,Africa
+Afghanistan,Asia_Pacific
+Bahrain,Asia_Pacific
+Bangladesh,Asia_Pacific
+Bhutan,Asia_Pacific
+Brunei,Asia_Pacific
+Burma (Myanmar),Asia_Pacific
+Cambodia,Asia_Pacific
+China,Asia_Pacific
+East Timor,Asia_Pacific
+India,Asia_Pacific
+Indonesia,Asia_Pacific
+Iraq,Asia_Pacific
+Israel,Asia_Pacific
+Japan,Asia_Pacific
+Jordan,Asia_Pacific
+Kazakhstan,Asia_Pacific
+North Korea,Asia_Pacific
+South Korea,Asia_Pacific
+Kuwait,Asia_Pacific
+Kyrgyzstan,Asia_Pacific
+Laos,Asia_Pacific
+Lebanon,Asia_Pacific
+Malaysia,Asia_Pacific
+Maldives,Asia_Pacific
+Mongolia,Asia_Pacific
+Nepal,Asia_Pacific
+Oman,Asia_Pacific
+Pakistan,Asia_Pacific
+Philippines,Asia_Pacific
+Qatar,Asia_Pacific
+Russia,Asia_Pacific
+Saudi Arabia,Asia_Pacific
+Singapore,Asia_Pacific
+Sri Lanka,Asia_Pacific
+Syria,Asia_Pacific
+Tajikistan,Asia_Pacific
+Thailand,Asia_Pacific
+Turkey,Asia_Pacific
+Turkmenistan,Asia_Pacific
+United Arab Emirates,Asia_Pacific
+Uzbekistan,Asia_Pacific
+Vietnam,Asia_Pacific
+Yemen,Asia_Pacific
+Albania,Europe
+Andorra,Europe
+Armenia,Europe
+Austria,Europe
+Azerbaijan,Europe
+Belarus,Europe
+Belgium,Europe
+Bosnia and Herzegovina,Europe
+Bulgaria,Europe
+Croatia,Europe
+Cyprus,Europe
+CZ,Europe
+Denmark,Europe
+Estonia,Europe
+Finland,Europe
+France,Europe
+Georgia,Europe
+Germany,Europe
+Greece,Europe
+Hungary,Europe
+Iceland,Europe
+Ireland,Europe
+Italy,Europe
+Latvia,Europe
+Liechtenstein,Europe
+Lithuania,Europe
+Luxembourg,Europe
+Macedonia,Europe
+Malta,Europe
+Moldova,Europe
+Monaco,Europe
+Montenegro,Europe
+Netherlands,Europe
+Norway,Europe
+Poland,Europe
+Portugal,Europe
+Romania,Europe
+San Marino,Europe
+Serbia,Europe
+Slovakia,Europe
+Slovenia,Europe
+Spain,Europe
+Sweden,Europe
+Switzerland,Europe
+Ukraine,Europe
+United Kingdom,Europe
+Vatican City,Europe
+Anguilla,America
+Antigua and Barbuda,America
+Bahamas,America
+Barbados,America
+Belize,America
+Canada,America
+Costa Rica,America
+Cuba,America
+Dominica,America
+Dominican Republic,America
+El Salvador,America
+Grenada,America
+Guatemala,America
+Haiti,America
+Honduras,America
+Jamaica,America
+Mexico,America
+Nicaragua,America
+Panama,America
+Saint Kitts and Nevis,America
+Saint Lucia,America
+Saint Vincent and the Grenadines,America
+Trinidad and Tobago,America
+US,America
+Australia,Asia_Pacific
+Fiji,Asia_Pacific
+Kiribati,Asia_Pacific
+Marshall Islands,Asia_Pacific
+Micronesia,Asia_Pacific
+Nauru,Asia_Pacific
+New Zealand,Asia_Pacific
+Palau,Asia_Pacific
+Papua New Guinea,Asia_Pacific
+Samoa,Asia_Pacific
+Solomon Islands,Asia_Pacific
+Tonga,Asia_Pacific
+Tuvalu,Asia_Pacific
+Vanuatu,Asia_Pacific
+Argentina,America
+Aruba,America
+Bolivia (Plurinational State of),America
+Brazil,America
+Chile,America
+Colombia,America
+Ecuador,America
+Guyana,America
+Paraguay,America
+Peru,America
+Suriname,America
+Uruguay,America
+Venezuela (Bolivarian Republic of),America
+Bermuda,America
+British Virgin Islands,America
+Cayman Islands,America
+Brunei Darussalam,Asia_Pacific
+Hong Kong,Asia_Pacific
+Macau,Asia_Pacific
+Cabo Verde,Africa
+Cook Islands,Asia_Pacific
+Curaçao,America
+Czechia,Europe
+Democratic People's Republic of Korea,Asia_Pacific
+Former USSR,Asia_Pacific
+French Polynesia,Asia_Pacific
+Greenland,America
+Iran,Asia_Pacific
+Kosovo,Europe
+Montserrat,America
+Myanmar,Asia_Pacific
+New Caledonia,Asia_Pacific
+Macedonia,Europe
+Puerto Rico,America
+Republic of Korea,Asia_Pacific
+Sint Maarten (Dutch part),America
+South Africa,Africa
+South Sudan,Africa
+State of Palestine,Asia_Pacific
+Syrian Arab Republic,Asia_Pacific
+Timor,Asia_Pacific
+Turks and Caicos Islands,America
+United States,America
