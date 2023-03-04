@@ -1,0 +1,111 @@
+---
+title: "project"
+author: "Tim"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE, warning = FALSE)
+```
+
+```{r}
+#load necessary libraries
+library(tidyverse) #readr, dplyr
+
+#Visual
+library(ggplot2)
+library(corrplot)
+
+#Analysis
+library(leaps) #regsubsets
+library(broom) #glance 
+library(car) #
+```
+
+```{r,message=FALSE,warning=FALSE}
+#Pre-process and merging data sets
+continent <- read_csv("continent.csv")
+
+population <- read_csv("population.csv") 
+
+lifetime <- read_csv("lifetime.csv")
+
+gdp <- read_csv("gdp.csv")
+
+edu <- read_csv("education.csv")
+
+
+death <- read_csv("death.csv") 
+
+diet <- read_csv("diet_composition.csv")
+
+mental <- read_csv("mental.csv") 
+
+smoking <- read_csv("smoking.csv") 
+
+obesity <- read_csv("obesity.csv")
+
+sanitation <- read_csv("sanitation.csv")
+  
+```
+
+
+```{r,message=FALSE,warning=FALSE}
+write_csv(continent,"continent.csv")
+write_csv(death,"death.csv")
+write_csv(dem,"democracy.csv")
+write_csv(edu,"education.csv")
+write_csv(gdp,"gdp.csv")
+write_csv(lifetime,"lifetime.csv")
+write_csv(population,"population.csv")
+write_csv(diet,"diet_composition.csv")
+write_csv(mental,"mental.csv")
+write_csv(smoking,"smoking.csv")
+write_csv(obesity,"obesity.csv")
+write_csv(sanitation,"sanitation.csv")
+```
+
+
+```{r}
+#Pre-processed in another file, so just upload all files
+continent <- read_csv("continent.csv") 
+population <- read_csv("population.csv")
+lifetime<- read_csv("lifetime.csv") 
+gdp <- read_csv("gdp.csv") 
+edu <- read_csv("education.csv")
+death <- read_csv("death.csv") 
+#newly added possible factors
+diet <- read_csv("diet_composition.csv")
+mental <- read_csv("mental.csv")
+smoking <- read_csv("smoking.csv") 
+obesity <- read_csv("obesity.csv")
+sanitation <- read_csv("sanitation.csv")
+#convert x
+one <- function(x){
+  x=ifelse (x>1,1,x) 
+}
+
+#merging
+df<- gdp %>% 
+  left_join(population,by = c("Country","Year")) %>% 
+  left_join(continent, by="Country") %>% 
+  left_join(lifetime, by=c("Country","Year")) %>% 
+  left_join(edu,by=c("Country","Year")) %>% 
+  left_join(death,by=c("Country","Year")) %>% 
+  left_join(diet,by=c("Country","Year")) %>% 
+  left_join(mental,by=c("Country","Year")) %>% 
+  left_join(smoking,by=c("Country","Year")) %>% 
+  left_join(obesity,by=c("Country","Year")) %>% 
+  left_join(sanitation,by=c("Country","Year")) %>% 
+  ungroup() %>% 
+  mutate_at(c("Country","Continent"), as.factor) %>%
+  #mutate gdp to gdp per capita
+  mutate_at(c("Inventory","Exports","Consumption","Household","Government","Imports","Sanitation"), funs(./Population)) %>% 
+  mutate_at("Sanitation",one) %>% 
+  relocate(!is.numeric,"Year") %>% 
+  na.omit() %>%
+  select(-"Lifetime","Lifetime") #Move Outcome Y to the last column
+```
+
+

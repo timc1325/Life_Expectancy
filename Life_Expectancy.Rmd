@@ -11,105 +11,165 @@ knitr::opts_chunk$set(echo = TRUE,message=FALSE, warning = FALSE)
 
 ```{r}
 #load necessary libraries
-library(tidyverse)
-library(tidymodels)
-tidymodels_prefer()
+library(tidyverse) #readr, dplyr
+
 #Visual
 library(ggplot2)
 library(corrplot)
+
+#Analysis
+library(leaps) #regsubsets
+library(broom) #glance 
+library(car) #
+
+#load processed dataset
+df <- read_csv("df.csv")
 ```
 
+*EDA*
 ```{r,message=FALSE,warning=FALSE}
-#pre-process
-continent <- read_csv("continent.csv") %>% 
-  select(2,1)
+df %>% select("Lifetime") %>% 
+  ggplot(aes(Lifetime))+geom_histogram()
+```
 
-lifetime<- read_csv("lifetime.csv") %>% 
-  rename(Country = 'Country or Area',Year="Year(s)", 
-         Lifetime="Value") %>% 
-  select(1,2,4) %>% 
-  filter(Year <= 2022)
 
-gdp <- read_csv("gdp.csv") %>%
-  filter(!grepl("GDP|capital formation",Item)) %>% 
-  rename(Country = 'Country or Area') %>% 
-  group_by(Country,Year,Item) %>% 
-  summarize("Value"= mean(Value)) %>% 
-  spread("Item","Value") 
-  
-population <- read_csv("population.csv",skip=3) %>% 
-  rename(Country = 'Country Name') %>% 
-  gather("Year","Population",-(1:4)) %>% 
-  mutate_at("Year", as.numeric) %>% 
-  select(-2,-3,-4)
+```{r}
+#Feature Selection
+#get the names of crucial features of Sequential, Forward and Backward Selection
 
-edu <- read_csv("education.csv") %>% select(-2) %>% rename(Country="Entity") %>% 
-  rename("Education"=
-           `Average Total Years of Schooling for Adult Population (Lee-Lee (2016), Barro-Lee (2018) and UNDP (2018))`)
-dem <- read_csv("democracy.csv") %>% select(-2) %>% rename(Country="Entity") %>% 
-  rename(dem1="electdem_vdem_owid",dem2="libdem_vdem_owid",dem3="participdem_vdem_owid",
-         dem4="delibdem_vdem_owid",dem5="egaldem_vdem_owid") %>% 
-  group_by(Country,Year) %>% 
-  summarize(Democracy=mean(c(dem1,dem2,dem3,dem4,dem5),na.rm=T))
+#exclude two categorical variable, and year variable, which is predetermined to be included in the data. 
+seqrep <- 
+  regsubsets(Lifetime~., data = df %>% select(c(-1,-2,-3)), 
+                     nvmax = 3, method = "seqrep") %>% 
+  summary()
+seqrep<- as.data.frame(seqrep$which)
+seqrep<- seqrep[,apply(seqrep, 2, function(x) any(x ==T))] %>% 
+  select(-1) %>% 
+  colnames()
 
-death <- read_csv("death.csv") %>% select(-2) %>% 
-  rename(Country="Entity") %>% 
-  select_if(~sum(is.na(.))<=500)
+#forward selection
+forward <- 
+  regsubsets(Lifetime~., data = df %>% select(-1,-2,-3), 
+                      nvmax = 3, method = "forward") %>% 
+  summary()
+forward<- as.data.frame(forward$which)
+forward<- forward[,apply(forward, 2, function(x) any(x ==T))] %>% 
+  select(-1) %>% 
+  colnames()
 
-df<- gdp %>% 
-  left_join(population,by = c("Country","Year")) %>% 
-  left_join(continent, by="Country") %>% 
-  left_join(lifetime, by=c("Country","Year")) %>% 
-  left_join(dem, by=c("Country","Year")) %>% 
-  left_join(edu,by=c("Country","Year")) %>% 
-  left_join(death,by=c("Country","Year")) %>% 
-  ungroup() %>% 
-  rename(Inventory= "Changes in inventories", 
-         Exports="Exports of goods and services",
-         Consumption="Final consumption expenditure", 
-         Government="General government final consumption expenditure",
-         Household="Household consumption expenditure (including Non-profit institutions serving households)",
-         Imports="Imports of goods and services") %>%
-  mutate_at(c("Inventory","Exports","Consumption","Household","Government","Imports"), as.numeric) %>%
-  mutate_at(c("Country","Continent"), as.factor) %>% 
-  relocate(!is.numeric,"Year") %>% 
-  na.omit() %>% 
-  select(-"Lifetime","Lifetime")
+
+#backward selection
+backward <- 
+  regsubsets(Lifetime~., data = df %>% select(-1,-2,-3), 
+                      nvmax = 3, method = "backward") %>% 
+  summary()
+backward<- as.data.frame(backward$which)
+backward<- backward[,apply(backward, 2, function(x) any(x ==T))] %>% 
+  select(-1) %>% 
+  colnames()
+
+
+feature_select_result <- cbind(seqrep,forward,backward)
+feature_select_result
+```
 
 
 
+```{r}
 
+#Compare AIC BIC Adjusted R^2 etc, then we decide to use Forward Selection result
+mod_for <- lm (as.formula(paste("Lifetime ~ ", paste(forward, collapse= "+"))),df) %>% 
+  glance() %>% 
+  select(1,2,6,9,10)
+mod_back <- lm (as.formula(paste("Lifetime ~ ", paste(backward, collapse= "+"))),df) %>% 
+  glance() %>% 
+  select(1,2,6,9,10)
+cbind(Type=c("Forward Selection", "Backward Selection"),
+      rbind(mod_for,mod_back))
+```
+
+```{r}
+#update our dataframe of interest
+#The reason to include Country and year into df is for explaining the outcome through historical events(War, Disease etc.). 
+forward <- str_replace_all(forward,"`","")
+df <- 
+  df %>% 
+  select(Country, Continent, Year, forward, Lifetime) %>% 
+  rename(HIV = `Deaths - HIV/AIDS - Sex: Both - Age: All Ages (Number)`) 
+
+#Use Symbox Function to see transformation needed for the variables
+
+par(mfrow=c(2,2))
+symbox(df$Year)
+symbox(df$Household)
+symbox(df$Education)
+symbox(df$HIV)
+```
+
+
+```{r}
+
+df
+
+write.csv(df,"lifeexpectancy.csv", row.names = T)
+
+```
+
+
+```{r}
+#Use the implied method by Symbox Function to transform the variables
+df <- 
+  df %>% 
+  mutate(Household=log(Household),
+         Education = Education^0.5,
+         HIV = log(HIV+1)) #add 1 to avoid the log 0 situation
+```
+
+
+```{r}
+#Correlation Plot
 df %>% 
-  select_if(is.numeric) %>% 
+  select(Year,Household,Education,HIV,Lifetime) %>% 
   cor() %>% 
-  corrplot(tl.cex=0.01)
-cnames <- cbind(df %>% colnames())
+  corrplot(tl.col="black")
 
+```
 
-library(MASS)
-library(leaps)
-library(caret)
-df<- df %>% select(-1,-2)
+```{r}
+#Full Model
+mod <- lm(Lifetime ~ Year+ Household + Education + HIV + Continent,df) 
+mod %>% 
+  summary()
+```
 
+```{r}
+#Usinf CV to test for overfitting
+
+set.seed(827)
+
+#Train test split; using 80% as training
+sample <- sample(c(TRUE, FALSE), nrow(df), replace=TRUE, prob=c(0.8,0.2))
+train  <- df[sample, ]
+test   <- df[!sample, ]
+
+# Cross-Validation
 set.seed(123)
+train.control <- trainControl(method = "cv", 
+                              number = 10, repeats = 3)
+# Train the model
+model <- train(Lifetime ~., data = train %>% select(-1), method = "glm",
+               trControl = train.control)
+pred <- predict(model,test)
 
-train.control <- trainControl(method = "cv", number = 10)
-
-step.model <- train(Lifetime ~., data = df,
-                    method = "leapBackward", 
-                    tuneGrid = data.frame(nvmax = 1:10),
-                    trControl = train.control
-                    )
-step.model$results
-
-```
-
-```{r}
-
+# Summarize the results
+model$resample
 ```
 
 
 ```{r}
-
+#Variance Assumption Check
+plot(mod)
 ```
+
+
 
